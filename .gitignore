@@ -1,1 +1,5 @@
+.env
+state.json
+downloader.log
 config.json
+launch.json
