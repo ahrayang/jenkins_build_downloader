@@ -49,7 +49,7 @@ if not users or not users[0].get("platform_dirs") or len(users[0]["platform_dirs
     root = tk.Tk(); root.withdraw()
     dirs = {}
     for p in platforms:
-        name = simpledialog.askstring("플랫폼 폴더", f"{p} 저장용 폴더명을 입력하세요:")
+        name = simpledialog.askstring("플랫폼 폴더", f"username을 포함한 {p} 저장용 폴더명을 입력하세요:(ex:ahra_{p})")
         dirs[p] = name.strip()
     config["users"] = [{"platform_dirs": dirs}]
     with CONF_PATH.open("w", encoding="utf-8") as f:
