@@ -13,7 +13,11 @@ from dotenv import load_dotenv
 import tkinter as tk
 from tkinter import simpledialog
 
-BASE_DIR    = Path(__file__).parent
+# 실행 경로 처리 (스크립트 vs 실행파일)
+if getattr(sys, 'frozen', False):
+    BASE_DIR = Path(sys.executable).parent
+else:
+    BASE_DIR = Path(__file__).parent
 CONF_PATH   = BASE_DIR / "config.json"
 STATE_PATH  = BASE_DIR / "state.json"
 
