@@ -73,7 +73,7 @@ else:
 
 # 로거 설정
 logging.basicConfig(
-    level=logging.DEBUG,  # 디버그 모드 활성화
+    level=logging.DEBUG,
     format="[%(asctime)s][%(levelname)s] %(message)s",
     handlers=[
         logging.FileHandler(BASE_DIR / "downloader.log", encoding="utf-8"),
@@ -114,6 +114,7 @@ def fetch_and_download(platform: str, job: str):
     build_no = info.get("number")
     logger.debug(f"{key} 빌드 번호: {build_no}")
     if state.get(key) == build_no:
+        logger.debug(f"{key} 최신 빌드 #{build_no}는 이미 다운로드됐습니다. 건너뜁니다.")
         return
 
     artifacts = info.get("artifacts", [])
@@ -125,7 +126,6 @@ def fetch_and_download(platform: str, job: str):
         logger.warning(f"{key}에서 '{kw}' 포함된 artifact가 없습니다.")
         return
 
-    # job_folder에서 qa 제거
     job_folder = job.lower()
     save_path = base_dir / platform_dirs[platform] / job_folder
     save_path.mkdir(parents=True, exist_ok=True)
@@ -134,18 +134,20 @@ def fetch_and_download(platform: str, job: str):
         rel          = art["relativePath"]
         artifact_url = urljoin(info["url"], "artifact/" + rel)
         fname        = f"{timestamp()}_{job}_{Path(rel).name}"
+        temp_dest    = save_path / (fname + ".part")
         dest         = save_path / fname
 
         if dest.exists():
-            logger.info(f"이미 존재: {dest} - 건너뜀")
+            logger.info(f"이미 존재: {dest} - 건너뜁니다.")
             continue
 
-        logger.info(f"다운로드 시작: {artifact_url} → {dest}")
+        logger.info(f"다운로드 시작: {artifact_url} → {temp_dest}")
         with requests.get(artifact_url, auth=auth, stream=True, timeout=20) as r:
             r.raise_for_status()
-            with dest.open("wb") as f:
+            with temp_dest.open("wb") as f:
                 for chunk in r.iter_content(chunk_size=8192):
                     f.write(chunk)
+        temp_dest.replace(dest)
         logger.info(f"완료: {dest}")
 
     state[key] = build_no
