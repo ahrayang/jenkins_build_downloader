@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import os
 import sys
 import time
@@ -14,12 +13,10 @@ from dotenv import load_dotenv
 import tkinter as tk
 from tkinter import simpledialog
 
-# 기본 설정
 BASE_DIR    = Path(__file__).parent
 CONF_PATH   = BASE_DIR / "config.json"
 STATE_PATH  = BASE_DIR / "state.json"
 
-# 환경변수 로드
 load_dotenv(dotenv_path=str(BASE_DIR / ".env"))
 JENKINS_URL  = os.getenv("JENKINS_URL")
 JENKINS_USER = os.getenv("JENKINS_USER")
@@ -29,14 +26,12 @@ if not all([JENKINS_URL, JENKINS_USER, JENKINS_TOKEN]):
     sys.exit(1)
 auth = (JENKINS_USER, JENKINS_TOKEN)
 
-# 설정 파일 읽기
 with CONF_PATH.open(encoding="utf-8") as f:
     config = json.load(f)
 platforms   = config.get("platforms", [])
 base_folder = config.get("base_folder")
 users       = config.get("users", [])
 
-# 최상위 폴더명 입력
 if not base_folder:
     root = tk.Tk(); root.withdraw()
     bf = simpledialog.askstring("최상위 폴더", "빌드를 저장할 최상위 폴더명을 입력하세요:")
@@ -46,7 +41,6 @@ if not base_folder:
     root.destroy()
     base_folder = config["base_folder"]
 
-# 플랫폼별 폴더명 입력
 if not users or not users[0].get("platform_dirs") or len(users[0]["platform_dirs"]) != len(platforms):
     root = tk.Tk(); root.withdraw()
     dirs = {}
@@ -59,19 +53,16 @@ if not users or not users[0].get("platform_dirs") or len(users[0]["platform_dirs
     root.destroy()
 platform_dirs = config["users"][0]["platform_dirs"]
 
-# base_dir 설정
 home_dir = Path.home()
 base_dir = home_dir / base_folder
 base_dir.mkdir(parents=True, exist_ok=True)
 
-# 이전 상태 로드
 if STATE_PATH.exists():
     with STATE_PATH.open(encoding="utf-8") as f:
         state = json.load(f)
 else:
     state = {}
 
-# 로거 설정
 logging.basicConfig(
     level=logging.DEBUG,
     format="[%(asctime)s][%(levelname)s] %(message)s",
@@ -82,7 +73,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Artifact 키워드 매핑
 KW_MAP = {
     "Client_Android": "binary.androidapk.",
     "Client_IOS":     "sol.ios.",
@@ -161,7 +151,7 @@ def main():
             futures = [executor.submit(fetch_and_download, p, j) for p in platforms for j in list_subjobs(p)]
             for future in as_completed(futures):
                 future.result()
-            time.sleep(5)
+            time.sleep()
     except KeyboardInterrupt:
         logger.info("프로그램 종료")
     finally:
