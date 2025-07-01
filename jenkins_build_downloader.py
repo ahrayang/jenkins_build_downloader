@@ -155,7 +155,7 @@ def main():
             futures = [executor.submit(fetch_and_download, p, j) for p in platforms for j in list_subjobs(p)]
             for future in as_completed(futures):
                 future.result()
-            time.sleep()
+            time.sleep(5)
     except KeyboardInterrupt:
         logger.info("프로그램 종료")
     finally:
