@@ -78,7 +78,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 KW_MAP = {
-    "Client_Android": "binary.androidapk.",
+    "Client_Android": "Binary.AndroidAab.",
     "Client_IOS":     "sol.ios.",
     "Client_Windows": "binary.win."
 }
